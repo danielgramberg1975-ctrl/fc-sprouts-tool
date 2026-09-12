@@ -1,85 +1,115 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FC Sprouts Hulpmiddel</title>
+    <title>FC Companion Tool</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <header>
-        <h1>FC Sprouts Companion App</h1>
-        <p>Alles wat je nodig hebt voor je FFXIV reis, speciaal voor onze Free Company!</p>
+        <h1>FC Companion Tool</h1>
+        <p>Everything you need for your FFXIV journey — built for our Free Company!</p>
     </header>
 
     <main class="container">
-        <section class="card level-selector">
-            <h2>Kies jouw huidige Level-fase:</h2>
-            <div class="btn-group">
-                <button class="btn active" onclick="changeLevel('1-15', this)">Level 1 - 15</button>
-                <button class="btn" onclick="changeLevel('16-30', this)">Level 16 - 30</button>
-                <button class="btn" onclick="changeLevel('31-50', this)">Level 31 - 50</button>
-            </div>
-            <p class="current-tier-text">Je bekijkt nu de content voor: <strong id="tier-display">Level 1 - 15</strong></p>
-        </section>
 
+        <!-- CRAFTING & GATHERING -->
         <section class="card">
-            <h2>Crafting & Gathering Assistent</h2>
-            <p>Kies een item dat je wilt maken om te zien wat je nodig hebt en waar je het vindt.</p>
+            <h2>Crafting Recipe Browser</h2>
+            <p>All <strong id="recipe-count">3,302</strong> A Realm Reborn crafting recipes, across all 8 disciples of the hand. Search by item name, or filter by class and level.</p>
 
-            <div class="recipe-select-box">
-                <label for="recipe-select">Kies een Recept: </label>
-                <select id="recipe-select" onchange="loadRecipe()"></select>
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <label for="class-filter">Class</label>
+                    <select id="class-filter">
+                        <option value="all">All classes</option>
+                        <option value="Carpenter">Carpenter</option>
+                        <option value="Blacksmith">Blacksmith</option>
+                        <option value="Armorer">Armorer</option>
+                        <option value="Goldsmith">Goldsmith</option>
+                        <option value="Leatherworker">Leatherworker</option>
+                        <option value="Weaver">Weaver</option>
+                        <option value="Alchemist">Alchemist</option>
+                        <option value="Culinarian">Culinarian</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="level-filter">Level range</label>
+                    <select id="level-filter">
+                        <option value="all">All levels (1-50)</option>
+                        <option value="1-15">Level 1 - 15</option>
+                        <option value="16-30">Level 16 - 30</option>
+                        <option value="31-50">Level 31 - 50</option>
+                    </select>
+                </div>
+
+                <div class="filter-group filter-search">
+                    <label for="search-box">Search item name</label>
+                    <input type="text" id="search-box" placeholder="e.g. Bronze Ingot...">
+                </div>
+            </div>
+
+            <p id="results-info" class="results-info"></p>
+
+            <div id="recipe-list" class="recipe-list">
+                <!-- Matching recipes appear here -->
             </div>
 
             <div id="recipe-result" class="hidden">
-                <h3>Boodschappenlijst voor: <span id="recipe-name" class="highlight"></span></h3>
+                <h3>Shopping list for: <span id="recipe-name" class="highlight"></span></h3>
+                <p id="recipe-meta" class="recipe-meta"></p>
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Materiaal</th>
-                            <th>Aantal</th>
-                            <th>Hoe kom je eraan?</th>
-                            <th>Locatie / Methode</th>
+                            <th>Material</th>
+                            <th>Amount</th>
                         </tr>
                     </thead>
-                    <tbody id="ingredients-list"></tbody>
+                    <tbody id="ingredients-list">
+                        <!-- Ingredients appear here -->
+                    </tbody>
                 </table>
+                <p class="note">Gathering locations and sources are coming in the next update.</p>
             </div>
         </section>
 
+        <!-- VISSERIJ -->
         <section class="card">
-            <h2>Visserij & Aas Gids (Fisher)</h2>
-            <p>Populaire vissen in deze level-fase en het juiste aas dat je moet gebruiken.</p>
+            <h2>Fishing & Bait Guide</h2>
+            <p class="note">Coming in a future update — this section will get real ARR fishing spot and bait data next.</p>
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Vis Naam</th>
-                        <th>Vereist Level</th>
-                        <th>Beste Aas (Bait)</th>
-                        <th>Vislocatie (Fishing Hole)</th>
+                        <th>Fish Name</th>
+                        <th>Required Level</th>
+                        <th>Best Bait</th>
+                        <th>Fishing Hole</th>
                     </tr>
                 </thead>
                 <tbody id="fishing-list"></tbody>
             </table>
         </section>
 
+        <!-- MACROS -->
         <section class="card">
-            <h2>Handige Crafting Macro's</h2>
-            <p>Kopieer deze macro's in-game via <code>/System &gt; Macro Instructions</code> om makkelijk HQ items te maken!</p>
+            <h2>Handy Crafting Macros</h2>
+            <p>Copy these macros in-game via <code>/System &gt; Macro Instructions</code> for easy HQ crafting!</p>
             <div id="macro-container"></div>
         </section>
 
+        <!-- DUNGEONS & CONTENT -->
         <section class="card">
-            <h2>Dungeons & Game Systemen</h2>
-            <p>Belangrijke ontgrendelingen en tactieken voor deze fase.</p>
+            <h2>Dungeons & Game Systems</h2>
+            <p>Key unlocks and tactics for this phase.</p>
             <div id="content-container"></div>
         </section>
     </main>
 
     <footer>
-        <p>&copy; 2026 Free Company Sprouts Hulpmiddel. Gemaakt met passie voor FFXIV.</p>
+        <p>&copy; 2026 FC Companion Tool. Made with love for FFXIV.</p>
     </footer>
 
     <script src="app.js"></script>
