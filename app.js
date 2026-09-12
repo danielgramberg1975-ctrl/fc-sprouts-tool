@@ -1,6 +1,7 @@
 // ===== STATE =====
 let allRecipes = [];
 let currentResults = [];
+let selectedRecipe = null;
 
 // ===== LOAD RECIPE DATA =====
 async function loadRecipes() {
@@ -43,8 +44,6 @@ function applyFilters() {
 }
 
 // ===== RENDER LIST =====
-const MAX_VISIBLE = 200; // avoid rendering thousands of rows at once
-
 function renderRecipeList() {
     const listEl = document.getElementById('recipe-list');
     const infoEl = document.getElementById('results-info');
@@ -55,13 +54,10 @@ function renderRecipeList() {
         return;
     }
 
-    const visible = currentResults.slice(0, MAX_VISIBLE);
-    infoEl.textContent = currentResults.length > MAX_VISIBLE
-        ? `Showing first ${MAX_VISIBLE} of ${currentResults.length} matching recipes — narrow your search to see more.`
-        : `${currentResults.length} matching recipe${currentResults.length === 1 ? '' : 's'}.`;
+    infoEl.textContent = `${currentResults.length} matching recipe${currentResults.length === 1 ? '' : 's'}.`;
 
     listEl.innerHTML = '';
-    visible.forEach(recipe => {
+    currentResults.forEach(recipe => {
         const row = document.createElement('div');
         row.className = 'recipe-row';
         row.innerHTML = `
@@ -81,19 +77,44 @@ function selectRecipe(recipe, rowEl) {
     document.querySelectorAll('.recipe-row').forEach(r => r.classList.remove('selected'));
     rowEl.classList.add('selected');
 
+    selectedRecipe = recipe;
+
     document.getElementById('recipe-name').textContent = recipe.result.item;
     document.getElementById('recipe-meta').textContent =
-        `${recipe.class} · Level ${recipe.level}${recipe.stars ? ' (' + recipe.stars + ' star)' : ''} · Yields ${recipe.result.amount}`;
+        `${recipe.class} · Level ${recipe.level}${recipe.stars ? ' (' + recipe.stars + ' star)' : ''} · ${recipe.result.amount} per craft`;
+
+    document.getElementById('qty-input').value = recipe.result.amount; // default to one full craft
+    renderIngredients();
+
+    document.getElementById('recipe-result').classList.remove('hidden');
+}
+
+// ===== RENDER INGREDIENTS FOR THE CHOSEN QUANTITY =====
+function renderIngredients() {
+    if (!selectedRecipe) return;
+
+    const qtyInput = document.getElementById('qty-input');
+    let desiredAmount = parseInt(qtyInput.value, 10);
+    if (!desiredAmount || desiredAmount < 1) desiredAmount = 1;
+    qtyInput.value = desiredAmount;
+
+    // How many times you need to actually run the craft to get at least the desired amount
+    const craftsNeeded = Math.ceil(desiredAmount / selectedRecipe.result.amount);
+    const totalProduced = craftsNeeded * selectedRecipe.result.amount;
+
+    document.getElementById('craft-count-info').textContent =
+        craftsNeeded > 1
+            ? `= ${craftsNeeded} crafts (yields ${totalProduced})`
+            : '';
 
     const list = document.getElementById('ingredients-list');
     list.innerHTML = '';
-    recipe.ingredients.forEach(ing => {
+    selectedRecipe.ingredients.forEach(ing => {
         const row = document.createElement('tr');
-        row.innerHTML = `<td>${ing.item}</td><td>${ing.amount}</td>`;
+        const totalNeeded = ing.amount * craftsNeeded;
+        row.innerHTML = `<td>${ing.item}</td><td>${totalNeeded}</td>`;
         list.appendChild(row);
     });
-
-    document.getElementById('recipe-result').classList.remove('hidden');
 }
 
 // ===== FISHING (placeholder, real data coming next update) =====
@@ -134,6 +155,30 @@ function renderContent() {
         container.appendChild(div);
     });
 }
+
+// ===== QUANTITY CONTROLS =====
+document.getElementById('qty-input').addEventListener('input', renderIngredients);
+document.getElementById('qty-minus').addEventListener('click', () => {
+    const input = document.getElementById('qty-input');
+    input.value = Math.max(1, (parseInt(input.value, 10) || 1) - 1);
+    renderIngredients();
+});
+document.getElementById('qty-plus').addEventListener('click', () => {
+    const input = document.getElementById('qty-input');
+    input.value = (parseInt(input.value, 10) || 1) + 1;
+    renderIngredients();
+});
+
+// ===== TAB SWITCHING =====
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.remove('hidden');
+    });
+});
 
 // ===== EVENT LISTENERS =====
 document.getElementById('class-filter').addEventListener('change', applyFilters);
