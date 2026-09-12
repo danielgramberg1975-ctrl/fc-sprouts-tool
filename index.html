@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FC Sprouts Hulpmiddel</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>FC Sprouts Companion App</h1>
+        <p>Alles wat je nodig hebt voor je FFXIV reis, speciaal voor onze Free Company!</p>
+    </header>
+
+    <main class="container">
+        <section class="card level-selector">
+            <h2>Kies jouw huidige Level-fase:</h2>
+            <div class="btn-group">
+                <button class="btn active" onclick="changeLevel('1-15', this)">Level 1 - 15</button>
+                <button class="btn" onclick="changeLevel('16-30', this)">Level 16 - 30</button>
+                <button class="btn" onclick="changeLevel('31-50', this)">Level 31 - 50</button>
+            </div>
+            <p class="current-tier-text">Je bekijkt nu de content voor: <strong id="tier-display">Level 1 - 15</strong></p>
+        </section>
+
+        <section class="card">
+            <h2>Crafting & Gathering Assistent</h2>
+            <p>Kies een item dat je wilt maken om te zien wat je nodig hebt en waar je het vindt.</p>
+
+            <div class="recipe-select-box">
+                <label for="recipe-select">Kies een Recept: </label>
+                <select id="recipe-select" onchange="loadRecipe()"></select>
+            </div>
+
+            <div id="recipe-result" class="hidden">
+                <h3>Boodschappenlijst voor: <span id="recipe-name" class="highlight"></span></h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Materiaal</th>
+                            <th>Aantal</th>
+                            <th>Hoe kom je eraan?</th>
+                            <th>Locatie / Methode</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ingredients-list"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Visserij & Aas Gids (Fisher)</h2>
+            <p>Populaire vissen in deze level-fase en het juiste aas dat je moet gebruiken.</p>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Vis Naam</th>
+                        <th>Vereist Level</th>
+                        <th>Beste Aas (Bait)</th>
+                        <th>Vislocatie (Fishing Hole)</th>
+                    </tr>
+                </thead>
+                <tbody id="fishing-list"></tbody>
+            </table>
+        </section>
+
+        <section class="card">
+            <h2>Handige Crafting Macro's</h2>
+            <p>Kopieer deze macro's in-game via <code>/System &gt; Macro Instructions</code> om makkelijk HQ items te maken!</p>
+            <div id="macro-container"></div>
+        </section>
+
+        <section class="card">
+            <h2>Dungeons & Game Systemen</h2>
+            <p>Belangrijke ontgrendelingen en tactieken voor deze fase.</p>
+            <div id="content-container"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Free Company Sprouts Hulpmiddel. Gemaakt met passie voor FFXIV.</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
