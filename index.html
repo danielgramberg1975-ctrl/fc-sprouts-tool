@@ -13,10 +13,18 @@
         <p>Everything you need for your FFXIV journey — built for our Free Company!</p>
     </header>
 
+    <nav class="tab-bar">
+        <button class="tab-btn active" data-tab="tab-crafting">Crafting</button>
+        <button class="tab-btn" data-tab="tab-gathering">Gathering</button>
+        <button class="tab-btn" data-tab="tab-fishing">Fishing</button>
+        <button class="tab-btn" data-tab="tab-macros">Macros</button>
+        <button class="tab-btn" data-tab="tab-dungeons">Dungeons</button>
+    </nav>
+
     <main class="container">
 
         <!-- CRAFTING & GATHERING -->
-        <section class="card">
+        <section class="card tab-panel" id="tab-crafting">
             <h2>Crafting Recipe Browser</h2>
             <p>All <strong id="recipe-count">3,302</strong> A Realm Reborn crafting recipes, across all 8 disciples of the hand. Search by item name, or filter by class and level.</p>
 
@@ -61,23 +69,84 @@
             <div id="recipe-result" class="hidden">
                 <h3>Shopping list for: <span id="recipe-name" class="highlight"></span></h3>
                 <p id="recipe-meta" class="recipe-meta"></p>
+
+                <div class="qty-bar">
+                    <label for="qty-input">Amount needed</label>
+                    <div class="qty-controls">
+                        <button type="button" id="qty-minus" class="qty-btn" aria-label="Decrease">&minus;</button>
+                        <input type="number" id="qty-input" value="1" min="1" step="1">
+                        <button type="button" id="qty-plus" class="qty-btn" aria-label="Increase">+</button>
+                    </div>
+                    <span id="craft-count-info" class="craft-count-info"></span>
+                </div>
+
                 <table class="data-table">
                     <thead>
                         <tr>
                             <th>Material</th>
                             <th>Amount</th>
+                            <th>Source</th>
                         </tr>
                     </thead>
                     <tbody id="ingredients-list">
                         <!-- Ingredients appear here -->
                     </tbody>
                 </table>
-                <p class="note">Gathering locations and sources are coming in the next update.</p>
+                <p class="note">Vendor-bought and housing-ward items aren't tagged yet — that's next.</p>
             </div>
         </section>
 
-        <!-- VISSERIJ -->
-        <section class="card">
+        <!-- GATHERING -->
+        <section class="card tab-panel hidden" id="tab-gathering">
+            <h2>Gathering Location Browser</h2>
+            <p>All <strong id="gathering-count">608</strong> Miner & Botanist items from A Realm Reborn, with class, method, level and zone.</p>
+
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <label for="gathering-class-filter">Class</label>
+                    <select id="gathering-class-filter">
+                        <option value="all">All classes</option>
+                        <option value="Miner">Miner</option>
+                        <option value="Botanist">Botanist</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="gathering-method-filter">Method</label>
+                    <select id="gathering-method-filter">
+                        <option value="all">All methods</option>
+                        <option value="Mining">Mining</option>
+                        <option value="Quarrying">Quarrying</option>
+                        <option value="Logging">Logging</option>
+                        <option value="Harvesting">Harvesting</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="gathering-level-filter">Level range</label>
+                    <select id="gathering-level-filter">
+                        <option value="all">All levels (1-50)</option>
+                        <option value="1-15">Level 1 - 15</option>
+                        <option value="16-30">Level 16 - 30</option>
+                        <option value="31-50">Level 31 - 50</option>
+                    </select>
+                </div>
+
+                <div class="filter-group filter-search">
+                    <label for="gathering-search-box">Search item name</label>
+                    <input type="text" id="gathering-search-box" placeholder="e.g. Maple Log...">
+                </div>
+            </div>
+
+            <p id="gathering-results-info" class="results-info"></p>
+
+            <div id="gathering-list" class="recipe-list">
+                <!-- Matching gathering items appear here -->
+            </div>
+        </section>
+
+        <!-- FISHING -->
+        <section class="card tab-panel hidden" id="tab-fishing">
             <h2>Fishing & Bait Guide</h2>
             <p class="note">Coming in a future update — this section will get real ARR fishing spot and bait data next.</p>
             <table class="data-table">
@@ -94,14 +163,14 @@
         </section>
 
         <!-- MACROS -->
-        <section class="card">
+        <section class="card tab-panel hidden" id="tab-macros">
             <h2>Handy Crafting Macros</h2>
             <p>Copy these macros in-game via <code>/System &gt; Macro Instructions</code> for easy HQ crafting!</p>
             <div id="macro-container"></div>
         </section>
 
         <!-- DUNGEONS & CONTENT -->
-        <section class="card">
+        <section class="card tab-panel hidden" id="tab-dungeons">
             <h2>Dungeons & Game Systems</h2>
             <p>Key unlocks and tactics for this phase.</p>
             <div id="content-container"></div>

@@ -2,6 +2,10 @@
 let allRecipes = [];
 let currentResults = [];
 let selectedRecipe = null;
+let allGathering = [];
+let currentGatheringResults = [];
+let gatheringByName = {};
+let recipeResultByName = {};
 
 // ===== LOAD RECIPE DATA =====
 async function loadRecipes() {
@@ -10,6 +14,8 @@ async function loadRecipes() {
         if (!response.ok) throw new Error('Could not load recipes.json');
         allRecipes = await response.json();
         document.getElementById('recipe-count').textContent = allRecipes.length.toLocaleString('en-US');
+        recipeResultByName = {};
+        allRecipes.forEach(r => { recipeResultByName[r.result.item] = r; });
         applyFilters();
     } catch (err) {
         document.getElementById('recipe-list').innerHTML =
@@ -18,7 +24,73 @@ async function loadRecipes() {
     }
 }
 
-// ===== FILTERING =====
+// ===== LOAD GATHERING DATA =====
+async function loadGathering() {
+    try {
+        const response = await fetch('data/gathering.json');
+        if (!response.ok) throw new Error('Could not load gathering.json');
+        allGathering = await response.json();
+        document.getElementById('gathering-count').textContent = allGathering.length.toLocaleString('en-US');
+        gatheringByName = {};
+        allGathering.forEach(g => { gatheringByName[g.item] = g; });
+        applyGatheringFilters();
+    } catch (err) {
+        document.getElementById('gathering-list').innerHTML =
+            '<p class="no-results">Could not load gathering data. Make sure data/gathering.json exists.</p>';
+        console.error(err);
+    }
+}
+
+function applyGatheringFilters() {
+    const classFilter = document.getElementById('gathering-class-filter').value;
+    const methodFilter = document.getElementById('gathering-method-filter').value;
+    const levelFilter = document.getElementById('gathering-level-filter').value;
+    const search = document.getElementById('gathering-search-box').value.trim().toLowerCase();
+
+    currentGatheringResults = allGathering.filter(g => {
+        if (classFilter !== 'all' && g.class !== classFilter) return false;
+        if (methodFilter !== 'all' && g.method !== methodFilter) return false;
+        if (!levelInRange(g.level, levelFilter)) return false;
+        if (search && !g.item.toLowerCase().includes(search)) return false;
+        return true;
+    });
+
+    currentGatheringResults.sort((a, b) => a.level - b.level || a.item.localeCompare(b.item));
+    renderGatheringList();
+}
+
+function renderGatheringList() {
+    const listEl = document.getElementById('gathering-list');
+    const infoEl = document.getElementById('gathering-results-info');
+
+    if (currentGatheringResults.length === 0) {
+        listEl.innerHTML = '<p class="no-results">No gathering items match your filters.</p>';
+        infoEl.textContent = '';
+        return;
+    }
+
+    infoEl.textContent = `${currentGatheringResults.length} matching item${currentGatheringResults.length === 1 ? '' : 's'}.`;
+
+    listEl.innerHTML = '';
+    currentGatheringResults.forEach(g => {
+        const row = document.createElement('div');
+        row.className = 'gathering-row';
+        const zonesText = g.zones.length ? g.zones.join(', ') : 'Exact zone not yet mapped';
+        row.innerHTML = `
+            <div class="gathering-row-top">
+                <span class="recipe-row-name">${g.item}</span>
+                <span class="recipe-row-tags">
+                    <span class="tag-class">${g.class}</span>
+                    <span class="tag-level">${g.method} · Lv ${g.level}</span>
+                </span>
+            </div>
+            <div class="gathering-zones${g.zones.length ? '' : ' unknown'}">${zonesText}</div>
+        `;
+        listEl.appendChild(row);
+    });
+}
+
+
 function levelInRange(level, rangeKey) {
     if (rangeKey === 'all') return true;
     const [min, max] = rangeKey.split('-').map(Number);
@@ -112,9 +184,23 @@ function renderIngredients() {
     selectedRecipe.ingredients.forEach(ing => {
         const row = document.createElement('tr');
         const totalNeeded = ing.amount * craftsNeeded;
-        row.innerHTML = `<td>${ing.item}</td><td>${totalNeeded}</td>`;
+        row.innerHTML = `<td>${ing.item}</td><td>${totalNeeded}</td><td>${sourceLabel(ing.item)}</td>`;
         list.appendChild(row);
     });
+}
+
+// ===== WORK OUT WHERE AN INGREDIENT COMES FROM =====
+function sourceLabel(itemName) {
+    const gathered = gatheringByName[itemName];
+    if (gathered) {
+        const zone = gathered.zones.length ? gathered.zones[0] : 'zone unknown';
+        return `<span class="source-gather">${gathered.class} · Lv ${gathered.level} · ${zone}</span>`;
+    }
+    const subRecipe = recipeResultByName[itemName];
+    if (subRecipe) {
+        return `<span class="source-craft">Crafted: ${subRecipe.class} Lv ${subRecipe.level}</span>`;
+    }
+    return `<span class="source-unknown">Vendor / other source</span>`;
 }
 
 // ===== FISHING (placeholder, real data coming next update) =====
@@ -185,9 +271,15 @@ document.getElementById('class-filter').addEventListener('change', applyFilters)
 document.getElementById('level-filter').addEventListener('change', applyFilters);
 document.getElementById('search-box').addEventListener('input', applyFilters);
 
+document.getElementById('gathering-class-filter').addEventListener('change', applyGatheringFilters);
+document.getElementById('gathering-method-filter').addEventListener('change', applyGatheringFilters);
+document.getElementById('gathering-level-filter').addEventListener('change', applyGatheringFilters);
+document.getElementById('gathering-search-box').addEventListener('input', applyGatheringFilters);
+
 // ===== STARTUP =====
 window.onload = function () {
     loadRecipes();
+    loadGathering();
     renderFishing();
     renderMacros();
     renderContent();
